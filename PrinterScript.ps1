@@ -1,4 +1,4 @@
-function Get-DriverNameFromINF {
+function Get-DriverStringsFromINF {
     param(
         [Parameter(Mandatory=$true)]
         [string]$Path
@@ -6,7 +6,7 @@ function Get-DriverNameFromINF {
     Get-Content $Path | Select-String -Pattern '\wDriver\w'    
 }
 
-function Test-DriverStore {
+function Search-DriverStore {
     param(
         [string]$Name,
         [string]$ProviderName
@@ -21,19 +21,71 @@ function Test-DriverStore {
 
 }
 
-
+function Test-PrinterPort {
+    param(
+        [string]$Name
+    )
+    if (Get-PrinterPort -Name $Name) {
+        return $true
+    }
+    else {
+        return $false
+    }
+}
 
 function Install-PrinterDriver {
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$DriverName,
+        [string]$INFFile,
+        [string]$INFPath
+    )
+    if ($INFFile) {
+        pnputil.exe /add-driver $INFFile
+        Add-PrinterDriver -Name $DriverName
+    }
+    else {
+        Add-PrinterDriver -Name $DriverName -INFPath $INFPath
+    }
+}
+
+
+$printerVariables = @{
+    PrinterName = ''
+    DriverName = ''
+    PortName = ''
+    PortNumber = ''
+}
+
+function Install-NetworkPrinter {
 
     param(
+        [string]$INFFile,
         [Parameter(Mandatory=$true)]
         [string]$Port,
         [string]$PortName,
         [Parameter(Mandatory=$true)]
-        [string]$DriverName
+        [string]$DriverName,
+        [string]$PrinterName
     )
-}
 
-$printerVariables = @{
+    $PortTest = ''
+    
+    if ($INFFile) {
+        pnputil.exe /add-driver $INFFile
+        Add-PrinterDriver $DriverName
+    }
+    if ($PortName) {$PortTest = $PortName}
+    else {$PortTest = $Port}
 
+    if (-not (Test-PrinterPort -Name $PortTest)) {
+        Add-PrinterPort -Name $PortTest -PrinterHostAddress $Port
+    }
+
+    if ($PrinterName) {
+        Add-Printer -Name $PrinterName -DriverName $DriverName -PortName $Port
+    }
+    else {
+        Add-Printer -Name $DriverName -DriverName $DriverName -PortName $Port
+    }
 }
