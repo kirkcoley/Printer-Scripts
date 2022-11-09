@@ -11,9 +11,8 @@ pnputil.exe /delete-driver oem34.inf
 pnputil.exe /delete-driver oem38.inf
 
 Write-Host "Deleting temporary filesystem items..."
-Remove-Item -Recurse -Path C:\HPNV\HPNV
-Remove-Item -Path "C:\Users\kirkc\OneDrive\Desktop\driverjunk\HPNV.zip"
+Remove-Item -Recurse -Path "C:\HPNV\HPNV"
 
-Set-Location -Path "C:\Users\kirkc\OneDrive\Desktop\driverjunk"
+Set-Location -Path "C:\"
 
 Write-Host "Done."
