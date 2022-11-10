@@ -1,9 +1,9 @@
 function Get-DriverStringsFromINF {
     param(
         [Parameter(Mandatory=$true)]
-        [string]$Path
+        [string]$INFFile
     )
-    Get-Content $Path | Select-String -Pattern '\wDriver\w'    
+    (Get-Content $Path -Delimiter '[' | Where-Object {$_ -Match '(?m)(Strings\])(.*)'}).Substring(8,$($sec.length - 9))
 }
 
 function Search-DriverStore {
@@ -37,24 +37,15 @@ function Install-PrinterDriver {
     param(
         [Parameter(Mandatory=$true)]
         [string]$DriverName,
-        [string]$INFFile,
-        [string]$INFPath
+        [string]$INFFile
     )
     if ($INFFile) {
         pnputil.exe /add-driver $INFFile
         Add-PrinterDriver -Name $DriverName
     }
     else {
-        Add-PrinterDriver -Name $DriverName -INFPath $INFPath
+        Add-PrinterDriver -Name $DriverName
     }
-}
-
-
-$printerVariables = @{
-    PrinterName = ''
-    DriverName = ''
-    PortName = ''
-    PortNumber = ''
 }
 
 function Install-NetworkPrinter {
